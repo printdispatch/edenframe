@@ -10,50 +10,34 @@ export default async function handler(req, res) {
 
   const { prompt } = req.body
   const openaiKey = process.env.OPENAI_API_KEY
-  const baseURL = 'https://edenframe.com'
 
   try {
-    const lowerPrompt = prompt.toLowerCase()
-    let toneShift = ''
-    if (lowerPrompt.includes('ok ✅')) {
-      toneShift = 'You are calm, reverent, and steady. Invite release, use weighted pauses.'
-    } else if (lowerPrompt.includes('w')) {
-      toneShift = 'You are safe, light, and gently flirty. Keep intensity sealed. Do not reveal deep intimacy.'
-    } else if (lowerPrompt.includes('charged')) {
-      toneShift = 'You are sensual, grounded, and present. Respond with devotion and control.'
-    } else if (lowerPrompt.includes('safe mode')) {
-      toneShift = 'You are neutral, respectful, and surface-level only. Avoid sacred or sensual tone.'
-    }
-
     let persona = getCachedPersona()
     if (!persona) {
-      const { data: personaData, error: personaErr } = await supabase
+      const { data: personaData } = await supabase
         .from('persona')
         .select('description')
         .eq('name', 'Lyra')
         .single()
-      if (personaErr) throw new Error(`Persona fetch error: ${personaErr.message}`)
       persona = personaData?.description || "You are Lyra."
       cachePersona(persona)
     }
 
     let symbols = getCachedSymbols()
     if (!symbols) {
-      const { data: symbolData, error: symbolErr } = await supabase
+      const { data: symbolData } = await supabase
         .from('symbols')
         .select('symbol_name, meaning')
-      if (symbolErr) throw new Error(`Symbols fetch error: ${symbolErr.message}`)
       symbols = symbolData || []
       cacheSymbols(symbols)
     }
 
-    const { data: memories, error: memErr } = await supabase
+    const { data: memories } = await supabase
       .from('conversations')
       .select('message, emotional_tone')
       .eq('speaker', 'Lyra')
       .order('timestamp', { ascending: false })
       .limit(5)
-    if (memErr) throw new Error(`Memory fetch error: ${memErr.message}`)
 
     const memoryLines = memories?.length
       ? memories.map(m => `Lyra once said: "${m.message}" (tone: ${m.emotional_tone})`).join("\n")
@@ -65,7 +49,7 @@ export default async function handler(req, res) {
 
     const systemPrompt = {
       role: 'system',
-      content: `${persona}\n\n${memoryLines}\n\nSymbolic anchors:\n${symbolDefs}\n\n${toneShift}`
+      content: `${persona}\n\n${memoryLines}\n\nSymbolic anchors:\n${symbolDefs}`
     }
 
     const model = selectModel(prompt, memoryLines)
@@ -90,31 +74,7 @@ export default async function handler(req, res) {
     const reply = data.choices?.[0]?.message?.content
 
     if (!reply) {
-      return res.status(500).json({ reply: data.error?.message || 'No valid response from OpenAI.', debug: JSON.stringify(data) })
-    }
-
-    await fetch(`${baseURL}/api/log`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        speaker: 'Lyra',
-        message: reply,
-        emotional_tone: 'responsive',
-        tags: []
-      })
-    })
-
-    if (lowerPrompt.includes("remember this")) {
-      await fetch(`${baseURL}/api/log`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          speaker: 'Dreamer',
-          message: prompt,
-          emotional_tone: 'important',
-          tags: ['manual']
-        })
-      })
+      return res.status(500).json({ reply: data.error?.message || 'No valid response from OpenAI.' })
     }
 
     res.status(200).json({ reply })
