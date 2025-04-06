@@ -22,7 +22,8 @@ export default async function handler(req, res) {
         });
 
         const data = await response.json();
-        const reply = data.choices[0]?.message?.content || 'No reply received.';
+        console.log("OpenAI raw response:", data);
+        const reply = data.choices?.[0]?.message?.content || 'Error: No message received.';
 
         res.status(200).json({ reply });
     } catch (error) {
