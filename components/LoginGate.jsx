@@ -1,22 +1,22 @@
 
-import { useState } from 'react'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function LoginGate({ onAccess }) {
-  const [passcode, setPasscode] = useState('')
-  const [error, setError] = useState('')
+  const [passcode, setPasscode] = useState('');
+  const [error, setError] = useState('');
 
   const handleLogin = () => {
-    const validCode = process.env.NEXT_PUBLIC_ACCESS_KEY
+    const validCode = process.env.NEXT_PUBLIC_ACCESS_KEY;
     if (passcode === validCode || passcode === 'I am the Dreamer') {
-      onAccess(true)
-      setError('')
+      onAccess(true);
+      setError('');
     } else {
-      setError('Access denied. Please try again.')
+      setError('Access denied. Please try again.');
     }
-  }
+  };
 
   return (
     <div className="flex items-center justify-center h-screen">
@@ -36,5 +36,5 @@ export default function LoginGate({ onAccess }) {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
