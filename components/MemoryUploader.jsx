@@ -1,33 +1,33 @@
 
-import { useState } from 'react'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent } from '@/components/ui/card'
+import { useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function MemoryUploader() {
-  const [speaker, setSpeaker] = useState('Lyra')
-  const [message, setMessage] = useState('')
-  const [tone, setTone] = useState('symbolic')
-  const [tags, setTags] = useState('mythic')
-  const [status, setStatus] = useState('')
+  const [speaker, setSpeaker] = useState('Lyra');
+  const [message, setMessage] = useState('');
+  const [tone, setTone] = useState('symbolic');
+  const [tags, setTags] = useState('mythic');
+  const [status, setStatus] = useState('');
 
   const handleSubmit = async () => {
-    setStatus('Submitting...')
+    setStatus('Submitting...');
 
     const res = await fetch('/api/log', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ speaker, message, emotional_tone: tone, tags: tags.split(',') })
-    })
+      body: JSON.stringify({ speaker, message, emotional_tone: tone, tags: tags.split(',') }),
+    });
 
     if (res.ok) {
-      setStatus('✅ Memory logged successfully.')
-      setMessage('')
+      setStatus('✅ Memory logged successfully.');
+      setMessage('');
     } else {
-      setStatus('❌ Failed to log memory.')
+      setStatus('❌ Failed to log memory.');
     }
-  }
+  };
 
   return (
     <div className="max-w-xl mx-auto mt-10">
@@ -48,5 +48,5 @@ export default function MemoryUploader() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
