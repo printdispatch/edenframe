@@ -111,6 +111,6 @@ export default async function handler(req, res) {
 
   } catch (err) {
     console.error("Error in generate:", err)
-    res.status(500).json({ reply: 'Internal error while generating response.' })
-  }
+    res.status(500).json({ reply: `Error: ${err.message}` })
+   }
 }
