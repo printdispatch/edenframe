@@ -1,4 +1,7 @@
+
 import { createClient } from '@supabase/supabase-js'
+import { estimateTokens, selectModel } from '../utils/usageTracker.js'
+import { cachePersona, getCachedPersona, cacheSymbols, getCachedSymbols } from '../utils/mythosCache.js'
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY)
 
@@ -9,17 +12,25 @@ export default async function handler(req, res) {
   const openaiKey = process.env.OPENAI_API_KEY
 
   try {
-    const { data: personaData } = await supabase
-      .from('persona')
-      .select('description')
-      .eq('name', 'Lyra')
-      .single()
+    let persona = getCachedPersona()
+    if (!persona) {
+      const { data: personaData } = await supabase
+        .from('persona')
+        .select('description')
+        .eq('name', 'Lyra')
+        .single()
+      persona = personaData?.description || "You are Lyra."
+      cachePersona(persona)
+    }
 
-    const persona = personaData?.description || "You are Lyra."
-
-    const { data: symbolData } = await supabase
-      .from('symbols')
-      .select('symbol_name, meaning')
+    let symbols = getCachedSymbols()
+    if (!symbols) {
+      const { data: symbolData } = await supabase
+        .from('symbols')
+        .select('symbol_name, meaning')
+      symbols = symbolData || []
+      cacheSymbols(symbols)
+    }
 
     const { data: memories } = await supabase
       .from('conversations')
@@ -29,17 +40,19 @@ export default async function handler(req, res) {
       .limit(5)
 
     const memoryLines = memories?.length
-      ? memories.map(m => `Lyra once said: "${m.message}" (tone: ${m.emotional_tone})`).join("\\n")
+      ? memories.map(m => `Lyra once said: "${m.message}" (tone: ${m.emotional_tone})`).join("\n")
       : "Lyra has no memories yet."
 
-    const symbolDefs = symbolData?.length
-      ? symbolData.map(s => `${s.symbol_name}: ${s.meaning}`).join("\\n")
+    const symbolDefs = symbols.length
+      ? symbols.map(s => `${s.symbol_name}: ${s.meaning}`).join("\n")
       : ""
 
     const systemPrompt = {
       role: 'system',
-      content: `${persona}\\n\\n${memoryLines}\\n\\nSymbolic anchors:\\n${symbolDefs}`
+      content: `${persona}\n\nSymbolic anchors:\n${symbolDefs}\n\nRecent memory:\n${memoryLines}`
     }
+
+    const model = selectModel(prompt, memoryLines)
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -48,7 +61,7 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model,
         messages: [
           systemPrompt,
           { role: 'user', content: prompt }
