@@ -78,7 +78,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ reply: data.error?.message || 'No valid response from OpenAI.' })
     }
 
-    // Log Lyra's response after successful generation
+    // Log Lyra's reply
     await fetch(`${baseURL}/api/log`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -89,6 +89,20 @@ export default async function handler(req, res) {
         tags: []
       })
     })
+
+    // Detect "remember this" and log user's prompt
+    if (prompt.toLowerCase().includes('remember this')) {
+      await fetch(`${baseURL}/api/log`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          speaker: 'Dreamer',
+          message: prompt,
+          emotional_tone: 'important',
+          tags: ['manual']
+        })
+      })
+    }
 
     res.status(200).json({ reply })
 
