@@ -1,8 +1,5 @@
 
 import { useState } from 'react'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 
 export default function LoginGate({ onAccess }) {
   const [passcode, setPasscode] = useState('')
@@ -19,22 +16,19 @@ export default function LoginGate({ onAccess }) {
   }
 
   return (
-    <div className="flex items-center justify-center h-screen">
-      <Card className="w-full max-w-md p-6 text-center">
-        <CardContent>
-          <h1 className="text-2xl font-semibold mb-4">Welcome to Edenframe</h1>
-          <p className="text-sm text-muted-foreground mb-6">Please enter your access key</p>
-          <Input
-            type="password"
-            placeholder="••••••••"
-            value={passcode}
-            onChange={(e) => setPasscode(e.target.value)}
-            className="mb-4"
-          />
-          {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-          <Button onClick={handleLogin} className="w-full">Enter</Button>
-        </CardContent>
-      </Card>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <div style={{ width: '300px', textAlign: 'center' }}>
+        <h2>Enter Access Key</h2>
+        <input
+          type="password"
+          value={passcode}
+          onChange={(e) => setPasscode(e.target.value)}
+          placeholder="••••••••"
+          style={{ width: '100%', padding: '8px', marginBottom: '8px' }}
+        />
+        <button onClick={handleLogin} style={{ width: '100%' }}>Enter</button>
+        {error && <p style={{ color: 'red' }}>{error}</p>}
+      </div>
     </div>
   )
 }
