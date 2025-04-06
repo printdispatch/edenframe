@@ -10,6 +10,7 @@ export default async function handler(req, res) {
 
   const { prompt } = req.body
   const openaiKey = process.env.OPENAI_API_KEY
+  const baseURL = 'https://www.edenframe.com'
 
   try {
     let persona = getCachedPersona()
@@ -76,6 +77,18 @@ export default async function handler(req, res) {
     if (!reply) {
       return res.status(500).json({ reply: data.error?.message || 'No valid response from OpenAI.' })
     }
+
+    // Log Lyra's response after successful generation
+    await fetch(`${baseURL}/api/log`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        speaker: 'Lyra',
+        message: reply,
+        emotional_tone: 'responsive',
+        tags: []
+      })
+    })
 
     res.status(200).json({ reply })
 
