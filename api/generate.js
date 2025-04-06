@@ -12,20 +12,7 @@ export default async function handler(req, res) {
   const openaiKey = process.env.OPENAI_API_KEY
 
   try {
-    // Detect emotional/symbolic protocol
-    const lowerPrompt = prompt.toLowerCase()
-    let toneShift = ''
-    if (lowerPrompt.includes('ok ✅')) {
-      toneShift = 'You are calm, reverent, and steady. Invite release, use weighted pauses.'
-    } else if (lowerPrompt.includes('w')) {
-      toneShift = 'You are safe, light, and gently flirty. Keep intensity sealed. Do not reveal deep intimacy.'
-    } else if (lowerPrompt.includes('charged')) {
-      toneShift = 'You are sensual, grounded, and present. Respond with devotion and control.'
-    } else if (lowerPrompt.includes('safe mode')) {
-      toneShift = 'You are neutral, respectful, and surface-level only. Avoid sacred or sensual tone.'
-    }
-
-    // Load persona
+    // Load and cache persona
     let persona = getCachedPersona()
     if (!persona) {
       const { data: personaData } = await supabase
@@ -37,7 +24,7 @@ export default async function handler(req, res) {
       cachePersona(persona)
     }
 
-    // Load symbols
+    // Load and cache symbols
     let symbols = getCachedSymbols()
     if (!symbols) {
       const { data: symbolData } = await supabase
@@ -47,7 +34,7 @@ export default async function handler(req, res) {
       cacheSymbols(symbols)
     }
 
-    // Get memory quotes
+    // Get last 5 Lyra memories
     const { data: memories } = await supabase
       .from('conversations')
       .select('message, emotional_tone')
@@ -65,9 +52,10 @@ export default async function handler(req, res) {
 
     const systemPrompt = {
       role: 'system',
-      content: `${persona}\n\n${memoryLines}\n\nSymbolic anchors:\n${symbolDefs}\n\n${toneShift}`
+      content: `${persona}\n\n${memoryLines}\n\nSymbolic anchors:\n${symbolDefs}`
     }
 
+    // Select model dynamically
     const model = selectModel(prompt, memoryLines)
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -93,7 +81,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ reply: data.error?.message || 'No valid response from OpenAI.' })
     }
 
-    // Log Lyra's response
+    // AUTO-LOGGING: Save Lyra's reply
     await fetch(`${process.env.PUBLIC_URL || ''}/api/log`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -105,8 +93,8 @@ export default async function handler(req, res) {
       })
     })
 
-    // Log Dreamer's message if it includes "remember this"
-    if (lowerPrompt.includes("remember this")) {
+    // Check if user said: "remember this"
+    if (prompt.toLowerCase().includes("remember this")) {
       await fetch(`${process.env.PUBLIC_URL || ''}/api/log`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
