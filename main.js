@@ -1,5 +1,6 @@
 
 let autoSpeak = false;
+let currentAudio = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     const toggle = document.getElementById('auto-toggle');
@@ -57,8 +58,15 @@ async function speak(text) {
         });
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
-        const audio = new Audio(url);
-        audio.play();
+
+        // Stop current audio if it's still playing
+        if (currentAudio && !currentAudio.paused) {
+            currentAudio.pause();
+            currentAudio.currentTime = 0;
+        }
+
+        currentAudio = new Audio(url);
+        currentAudio.play();
     } catch (err) {
         console.error('Voice error:', err);
     }
