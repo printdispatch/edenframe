@@ -1,2 +1,13 @@
 <!-- Edenframe main HTML -->
-<!DOCTYPE html><html><head><title>Edenframe</title></head><body><h1>Welcome, Dreamer</h1><script src='main.js'></script></body></html>
+<!DOCTYPE html><html><head><title>Edenframe</title></head><body><form id="prompt-form">
+  <input id="prompt-input" type="text" placeholder="Speak to Lyra..." />
+  <button type="submit">Send</button>
+</form>
+
+<div id="response"></div>
+<div id="voice-button-container"></div>
+
+<label style="margin-top: 1em; display: block;">
+  <input type="checkbox" id="auto-toggle" />
+  Auto Speak Mode
+</label><script src='main.js'></script></body></html>
