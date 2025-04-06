@@ -1,7 +1,7 @@
 
 import { useState } from 'react'
-import LoginGate from '@/components/LoginGate'
-import MemoryUploader from '@/components/MemoryUploader'
+import LoginGate from '../components/LoginGate'
+import MemoryUploader from '../components/MemoryUploader'
 
 export default function DreamerDashboard() {
   const [authorized, setAuthorized] = useState(false)
