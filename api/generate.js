@@ -22,12 +22,18 @@ export default async function handler(req, res) {
         });
 
         const data = await response.json();
-        console.log("OpenAI raw response:", data);
-        const reply = data.choices?.[0]?.message?.content || 'Error: No message received.';
+        console.log("OpenAI raw response:", JSON.stringify(data, null, 2));
 
-        res.status(200).json({ reply });
+        if (data.choices && data.choices.length > 0 && data.choices[0].message) {
+            res.status(200).json({ reply: data.choices[0].message.content });
+        } else if (data.error) {
+            res.status(500).json({ reply: `OpenAI Error: ${data.error.message}` });
+        } else {
+            res.status(500).json({ reply: 'Error: No valid message returned from OpenAI.' });
+        }
+
     } catch (error) {
-        console.error('OpenAI error:', error);
-        res.status(500).json({ error: 'OpenAI request failed' });
+        console.error('OpenAI API Error:', error);
+        res.status(500).json({ reply: 'Request failed. Could not contact OpenAI.' });
     }
 }
