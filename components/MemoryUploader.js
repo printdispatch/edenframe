@@ -44,8 +44,15 @@ export default function MemoryUploader() {
       <textarea className="p-2 border rounded w-full" placeholder="Message" value={message} onChange={(e) => setMessage(e.target.value)} /><br />
       <input className="p-2 border rounded w-full" placeholder="Tone" value={tone} onChange={(e) => setTone(e.target.value)} /><br />
       <input className="p-2 border rounded w-full" placeholder="Tags" value={tags} onChange={(e) => setTags(e.target.value)} /><br />
-      <button onClick={handleSubmit}>Upload</button>
-      <p>{status}</p>
+     <button
+        onClick={handleSubmit}
+        className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800"
+>
+  Upload
+</button>
+
+      <p className="mt-2 text-sm text-green-600">{status}</p>
+
     </div>
   )
 }
