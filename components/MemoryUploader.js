@@ -28,10 +28,22 @@ export default function MemoryUploader() {
   return (
     <div style={{ maxWidth: '600px', margin: '50px auto' }}>
       <h2>Manual Memory Entry</h2>
-      <input placeholder="Speaker" value={speaker} onChange={(e) => setSpeaker(e.target.value)} /><br />
-      <textarea placeholder="Message" value={message} onChange={(e) => setMessage(e.target.value)} /><br />
-      <input placeholder="Tone" value={tone} onChange={(e) => setTone(e.target.value)} /><br />
-      <input placeholder="Tags" value={tags} onChange={(e) => setTags(e.target.value)} /><br />
+      <div className="flex items-center gap-4 mb-4">
+  <label className="text-sm font-medium">Speaker:</label>
+  <button
+    type="button"
+    onClick={() => setSpeaker(speaker === 'Lyra' ? 'Dreamer' : 'Lyra')}
+    className={`px-3 py-1 rounded border ${
+      speaker === 'Lyra' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-black'
+    }`}
+  >
+    {speaker}
+  </button>
+</div>
+
+      <textarea className="p-2 border rounded w-full" placeholder="Message" value={message} onChange={(e) => setMessage(e.target.value)} /><br />
+      <input className="p-2 border rounded w-full" placeholder="Tone" value={tone} onChange={(e) => setTone(e.target.value)} /><br />
+      <input className="p-2 border rounded w-full" placeholder="Tags" value={tags} onChange={(e) => setTags(e.target.value)} /><br />
       <button onClick={handleSubmit}>Upload</button>
       <p>{status}</p>
     </div>
