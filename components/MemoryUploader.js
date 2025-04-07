@@ -26,9 +26,7 @@ export default function MemoryUploader() {
   }
 
   return (
-    <div style={{ maxWidth: '600px', margin: '50px auto' }}>
-      <h2>Manual Memory Entry</h2>
-      <div className="flex items-center gap-4 mb-4">
+    <div className="flex items-center gap-4 mb-4">
   <label className="text-sm font-medium">Speaker:</label>
   <button
     type="button"
@@ -40,6 +38,7 @@ export default function MemoryUploader() {
     {speaker}
   </button>
 </div>
+
 
       <textarea className="p-2 border rounded w-full" placeholder="Message" value={message} onChange={(e) => setMessage(e.target.value)} /><br />
       <input className="p-2 border rounded w-full" placeholder="Tone" value={tone} onChange={(e) => setTone(e.target.value)} /><br />
